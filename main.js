@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    http://your.homepage/
-// @version      0.1
+// @version      1
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
 // @grant        GM_xmlhttpRequest
+// @downloadURL  https://raw.githubusercontent.com/basvdaakster/loungelinker/master/main.js
+// @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/main.js
 // ==/UserScript==
 
 //http://www.reddit.com/r/csgobetting/search?q=selftext:http://csgolounge.com/match?m=1788&sort=top&restrict_sr=on&t=all
