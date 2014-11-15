@@ -54,7 +54,7 @@ function getHltvLink(teamA, teamB, callback) {
 	}
 	
 	teamA = teamA.toLowerCase();
-	teamA = hltvMapping[teamA] || teamB;
+	teamA = hltvMapping[teamA] || teamA;
 	teamB = teamB.toLowerCase();
 	teamB = hltvMapping[teamB] || teamB;
 
