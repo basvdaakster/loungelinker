@@ -10,8 +10,6 @@
 // @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // ==/UserScript==
 
-//http://www.reddit.com/r/csgobetting/search?q=selftext:http://csgolounge.com/match?m=1788&sort=top&restrict_sr=on&t=all
-
 var hltvMapping = {
 	// csgolounge : hltv
 	'mouz': 'mousesports',
