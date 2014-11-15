@@ -16,8 +16,7 @@ var hltvMapping = {
 	// csgolounge : hltv
 	'mouz': 'mousesports',
 	'cph.w': 'cph wolves',
-	'vp': 'virtus.pro',
-	'lc': 'london conspiracy',
+	'vp': 'virtus.pro'
 };
 
 var redditRegex = new RegExp('<a class="title may-blank.*?" href="/r/csgobetting/comments/(.*?)" tabindex="1" >(.*?)</a>', 'g');
