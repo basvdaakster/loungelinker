@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.3
+// @version      1.4
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -13,7 +13,10 @@
 // @run-at       document-body
 // @downloadURL  https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
+// @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // ==/UserScript==
+
+console.log('LoungeLinker started');
 
 var values = GM_listValues();
 for(var i in values) {
@@ -38,6 +41,7 @@ var hltvMapping = {
 };
 
 var dmgMapping = {
+	// csgolounge : 99dmg
 	'cph.w': 'cph',
 	'vp': 'virtus',
 	'lc': 'london conspiracy'
@@ -168,16 +172,16 @@ function addLinks() {
 		
 		dmgContainer.append($("<b>99Dmg: </b>"));
 		dmgContainer.hide();
-        
+
         getRedditLinks(matchUrl, function(links) {
             if(links.length > 0) {
                 for(var i = 0; i < links.length; i++) {
-                    var a = $('<span onclick="window.open(\'' + links[i].url + '\', \'_blank\');return false" style="width: 100%; float: left"><b>Reddit:</b> ' + links[i].text + '</span>');
+                    var a = $('<span onclick="window.open(\'' + links[i].url + '\', \'_blank\');return false" style="width: 100%; float: left"><b style="margin-right: 4px">Reddit:</b>' + links[i].text + '</span>');
                     redditContainer.append(a);
                 }
             }
         });
-    
+
         getHltvLink(teams[0], teams[1], function(link) {
             if(link) {
                 var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false" style="width: 100%; float: left"><b>HLTV</b></span>');
@@ -188,7 +192,7 @@ function addLinks() {
 		get99DmgTeamLink(teams[0], function(link) {
             if(link) {
 				dmgContainer.show();
-                var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false">' + teams[0] + '</span>');
+                var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false" style="margin-right: 4px">' + teams[0] + '</span>');
                 dmgContainer.append(a);
             }
 		});
@@ -196,7 +200,7 @@ function addLinks() {
 		get99DmgTeamLink(teams[1], function(link) {
             if(link) {
 				dmgContainer.show();
-                var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false" style="margin-left: 4px">' + teams[1] + '</span>');
+                var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false" style="margin-right: 4px">' + teams[1] + '</span>');
                 dmgContainer.append(a);
             }
 		});
