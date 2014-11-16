@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.1
+// @version      1.2
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -187,16 +187,9 @@ function addLinks() {
         
         var redditContainer = $('<div>');
         var hltvContainer = $('<div>');
-        
-        var redditDone = false;
-        var hltvDone = false;
-        
-        function finish() {
-            if(redditDone && hltvDone) {
-                container.append(redditContainer);
-                container.append(hltvContainer);
-            }
-        }
+	
+		container.append(redditContainer);
+		container.append(hltvContainer);
         
         getRedditLinks(matchUrl, function(links) {
             if(links.length > 0) {
@@ -205,9 +198,6 @@ function addLinks() {
                     redditContainer.append(a);
                 }
             }
-            
-            redditDone = true;
-            finish();
         });
     
         getHltvLink(teams[0], teams[1], function(link) {
@@ -215,9 +205,6 @@ function addLinks() {
                 var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false" style="width: 100%; float: left"><b>HLTV</b></span>');
                 hltvContainer.append(a);
             }
-            
-            hltvDone = true;
-            finish();
         });
     });
 }
