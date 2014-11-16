@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.2
+// @version      1.3
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -37,43 +37,10 @@ var hltvMapping = {
     'vp': 'virtus.pro'
 };
 
-var gopherMapping = {
-    'area51': 'Area51',
-    'bst': 'BST',
-    'cloud9': 'Cloud9',
-    'cph.w': 'Copenhagen Wolves',
-    'dat': 'dAT Team',
-    'epsilon': 'Epsilon eSports',
-    'esc': 'ESC Gaming',
-    'exertus': 'Exertus',
-    'fnatic': 'fnatic',
-    'global gaming': 'Global Gaming',
-    'hr': 'HellRaisers',
-    'ibp': 'iBUYPOWER',
-    'justus pro': 'JusTus Pro',
-    'k1ck': 'k1ck eSports Club',
-    'ldlc': 'LDLC.com',
-    'lc': 'London Conspiracy',
-    'lunatik': 'LunatiK eSports',
-    'mercenary': 'Mercenary',
-    'mouz': 'mousesports',
-    'mwnl': 'MWNL',
-    'navi': 'Natus Vincere',
-    'netcodeguides': 'Netcode Guides',
-    'nip': 'Ninjas in Pyjamas',
-    'no sir!': 'NO SIR!',
-    'nostalgie': 'Nostalgie',
-    'over gaming': 'Over Gaming',
-    'reliable gaming': 'Reliable Gaming',
-    'sapphirekelownadotcom': 'SapphireKelownaDotCom',
-    'savage': 'savage',
-    'alternate': 'Team ALTERNATE',
-    'dignitas': 'Team Dignitas',
-    'tempo': 'Tempo',
-    'the stream team': 'The Stream Team',
-    'titan': 'Titan eSports',
-    'vexx': 'VexX',
-    'vp': 'Virtus.Pro'
+var dmgMapping = {
+	'cph.w': 'cph',
+	'vp': 'virtus',
+	'lc': 'london conspiracy'
 };
 
 var redditRegex = new RegExp('<a class="title may-blank.*?" href="/r/csgobetting/comments/(.*?)" tabindex="1" >(.*?)</a>', 'g');
@@ -130,36 +97,42 @@ function getHltvLink(teamA, teamB, callback) {
     }
 }
 
-/*function getGopherLink(teamA, teamB, callback) {
-	var cache = GM_getValue(teamA + '_' + teamB + '_gopher');
-    if(cache) {
-        console.log('Loaded \'' + teamA + '_' + teamB + '_gopher\' from cache');
-        return callback(cache[0]);
-    }
-	
-    teamA = gopherMapping[teamA.toLowerCase()] || 'any team';
-    teamB = gopherMapping[teamB.toLowerCase()] || 'any team';
-	
-    if(teamA != teamB) {
-		var formData = new FormData();
-		formData.append('Team1', teamA);
-		formData.append('Team2', teamB);
-		formData.append('map', 'any map');
-		formData.append('included_events', '');
-		formData.append('excluded_events', '');
-		formData.append('excludedmaps', '');
-		formData.append('start_date', '');
-		formData.append('end_date', '');
-	
-        GM_xmlhttpRequest({ method: 'POST', url: 'http://csgopher.com/handler.php', data: formData, onload: function(response) {
-            console.log(response);
-			callback(null);
-        }, onerror: function() { callback(null); }});
-    }
-	else {
-		callback(null);
+function get99DmgTeamLink(team, callback) {
+	team = team.toLowerCase();
+	team = dmgMapping[team] || team;
+	var cache = GM_getValue(team + '_99dmg');
+	if(cache) {
+        console.log('Loaded \'' + team + '_99dmg\' from cache');
+		callback(cache);
 	}
-}*/
+	else {
+		GM_xmlhttpRequest({ 
+			method: 'POST', 
+			url: 'http://csgo.99damage.de/ajax/edb_team_ac?type=99damage', 
+			data: 'search_ac_check=' + encodeURIComponent(team), 
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				'Accept': 'application/json, text/javascript, */*; q=0.01',
+				'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+			},
+			onload: function(response) {
+				var json = JSON.parse(response.responseText);
+				if(json.join && json.length > 0) {
+					var link = 'http://csgo.99damage.de/de/edb/team/' + json[0][0];
+					GM_setValue(team + '_99dmg', [ link, Date.now() ]);
+					console.log('Cached \'' + team + '_99dmg\'');
+					callback(link);
+				}
+				else {
+					callback(null);
+				}
+			}, 
+			onerror: function() { 
+				callback(null); 
+			}
+		});
+	}
+}
 
 GM_xmlhttpRequest({ method: 'GET', url: 'http://www.hltv.org/', onload: function (response) {
     var hltvSource = response.responseText.replace(/[\r\n]/g, '');
@@ -187,9 +160,14 @@ function addLinks() {
         
         var redditContainer = $('<div>');
         var hltvContainer = $('<div>');
+        var dmgContainer = $('<div>');
 	
 		container.append(redditContainer);
 		container.append(hltvContainer);
+		container.append(dmgContainer);
+		
+		dmgContainer.append($("<b>99Dmg: </b>"));
+		dmgContainer.hide();
         
         getRedditLinks(matchUrl, function(links) {
             if(links.length > 0) {
@@ -206,5 +184,21 @@ function addLinks() {
                 hltvContainer.append(a);
             }
         });
+		
+		get99DmgTeamLink(teams[0], function(link) {
+            if(link) {
+				dmgContainer.show();
+                var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false">' + teams[0] + '</span>');
+                dmgContainer.append(a);
+            }
+		});
+		
+		get99DmgTeamLink(teams[1], function(link) {
+            if(link) {
+				dmgContainer.show();
+                var a = $('<span onclick="window.open(\'' + link + '\', \'_blank\');return false" style="margin-left: 4px">' + teams[1] + '</span>');
+                dmgContainer.append(a);
+            }
+		});
     });
 }
