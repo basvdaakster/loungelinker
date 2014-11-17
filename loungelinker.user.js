@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.51
+// @version      1.52
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -11,12 +11,13 @@
 // @grant        GM_getValue
 // @grant        GM_deleteValue
 // @grant        GM_listValues
+// @grant        GM_info
 // @run-at       document-body
 // @downloadURL  https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // ==/UserScript==
-var version = 1.51;
+var version = GM_info().script.version || 0;
 
 function cacheValue(key, value) {
 	GM_setValue('cache_' + key, value);
