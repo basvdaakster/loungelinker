@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.52
+// @version      1.54
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -17,7 +17,7 @@
 // @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // ==/UserScript==
-var version = GM_info().script.version || 0;
+var version = GM_info && GM_info["script"] && GM_info["script"]["version"] ? parseFloat(GM_info["script"]["version"]) : 0;
 
 function cacheValue(key, value) {
 	GM_setValue('cache_' + key, value);
@@ -53,7 +53,7 @@ if(GM_getValue('version') < version) {
 }
 GM_setValue('version', version);
 
-console.log('LoungeLinker started');
+console.log('LoungeLinker v' + version + ' started');
 
 /* Check cache for old values */
 var keys = GM_listValues();
@@ -84,7 +84,8 @@ var hltvMapping = {
     // csgolounge : hltv
     'mouz': 'mousesports',
     'cph.w': 'cph wolves',
-    'vp': 'virtus.pro'
+    'vp': 'virtus.pro',
+	'platinum': 'platinium'
 };
 
 var dmgMapping = {
@@ -97,7 +98,8 @@ var dmgMapping = {
 
 /* Used for scraping */
 var redditRegex = new RegExp('<a class="title may-blank.*?" href="/r/csgobetting/comments/(.*?)" tabindex="1" >(.*?)</a>', 'g');
-var hltvRegex = new RegExp('<a href="/match/([\\d\\w\\-\\.\\?]*?)">\\s*<img src="http://static\\.hltv\\.org/.*?" alt="" height="12" width="18" class=""/>\\s*<span style="vertical-align: 10%;">(.*?)</span>\\s*<br/>\\s*<span style="vertical-align: 90%;"><img src="http://static\\.hltv\\.org/.*?" alt="" height="12" width="18" class=""/></span>\\s*<span style="vertical-align: top;">(.*?)</span></a>', 'gi');
+var hltvRegex = new RegExp('<a href="/match/([\\w\\-\\.\\?]*?)">\\s*<img src="http://static\\.hltv\\.org/.*?" alt="" height="12" width="18" class=""/>\\s*<span style="vertical-align: 10%;">(.*?)</span>\\s*<br/>\\s*<span style="vertical-align: 90%;"><img src="http://static\\.hltv\\.org/.*?" alt="" height="12" width="18" class=""/></span>\\s*<span style="vertical-align: top;">(.*?)</span></a>', 'gi');
+var hltvUpcomingRegex = new RegExp('<a href="/match/([\\w\\-\\.\\?]*?)"> <img src="http://static\\.hltv\\.org/.*?" alt="" height="12" width="18" class=""/> <span style="vertical-align: 10%;">(.*?)</span> <div style="margin-top:-2px;"></div></a><div style="_padding-top:5px;_padding-bottom:5px;margin-top:5px;margin-bottom:5px;color:black;"><a style="color:black;" href="/match/[\\w\\-\\.\\?]*?">[\\w\\-\\.\\?]*?</a></div><a href="/match/[\\w\\-\\.\\?]*?" > <span style="vertical-align: 90%;"><img src="http://static\\.hltv\\.org/.*?" alt="" height="12" width="18" class=""/></span> <span style="vertical-align: top;">(.*?)</span></a>', 'gi');
 var hltvMatches = [];
 
 function getRedditLinks(matchUrl, callback) {
@@ -335,6 +337,13 @@ else {
 					hltvMatches.push([ matches[2].toLowerCase(), matches[3].toLowerCase(), matches[1] ]);
 				}
 			}
+			
+			while(matches = hltvUpcomingRegex.exec(hltvSource)) {
+				if(matches.length >= 4) {
+					hltvMatches.push([ matches[2].toLowerCase(), matches[3].toLowerCase(), matches[1] ]);
+				}
+			}
+			console.log(hltvMatches);
 			
 			addLinks();
 		}, onerror: function() { addLinks(); }});
