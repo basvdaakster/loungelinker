@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.5
+// @version      1.51
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -16,7 +16,7 @@
 // @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // ==/UserScript==
-var version = 1.5;
+var version = 1.51;
 
 function cacheValue(key, value) {
 	GM_setValue('cache_' + key, value);
@@ -90,7 +90,8 @@ var dmgMapping = {
 	// csgolounge : 99dmg
 	'cph.w': 'cph',
 	'vp': 'virtus',
-	'lc': 'london conspiracy'
+	'lc': 'london conspiracy',
+	'ams': 'animosity'
 };
 
 /* Used for scraping */
