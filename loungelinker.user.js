@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      0.54
+// @version      1.6
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -22,7 +22,7 @@ var version = GM_info && GM_info['script'] && GM_info['script']['version'] ? par
 var lastUpdateCheck = GM_getValue('cache_lastupdate');
 if(!lastUpdateCheck || Date.now() - lastUpdateCheck > 1000 * 60 * 60 * 24) {
 	GM_xmlhttpRequest({ method: 'GET', url: 'https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js?'+Math.random(), onload: function(response) {
-		var versionMatch = /@version\s+(\d+(?:\.\d+))/.exec(response.responseText);console.log(response);
+		var versionMatch = /@version\s+(\d+(?:\.\d+))/.exec(response.responseText);
 		if(versionMatch && versionMatch.length == 2) {
 			if(parseFloat(versionMatch[1]) > version) {
 				var notification = $('<div>');
@@ -114,7 +114,8 @@ var hltvMapping = {
     'mouz': 'mousesports',
     'cph.w': 'cph wolves',
     'vp': 'virtus.pro',
-	'platinum': 'platinium'
+	'platinum': 'platinium',
+	'ibp': 'ibuypower'
 };
 
 var dmgMapping = {
@@ -349,14 +350,16 @@ function addSettings() {
 	var hltvError = $('<span style="padding-top: 8px; color: red"></span>');
 	
 	function addHltvMapping(a, b) {
-		if(a.trim().length == 0 || b.trim().length == 0) {
+		a = a.trim().toLowerCase();
+		b = b.trim().toLowerCase();
+		if(a.length == 0 || b.length == 0) {
 			hltvError.css('color', 'red').text('Please fill in both textfields');
 		}
-		else if(hltvMapping[a.trim()]) {
+		else if(hltvMapping[a]) {
 			hltvError.css('color', 'red').text('A mapping for \'' + a + '\' already exists');
 		}
 		else {
-			hltvMapping[a] = b.trim();
+			hltvMapping[a] = b;
 			GM_setValue('hltv_mapping', JSON.stringify(hltvMapping));
 			hltvError.css('color', 'white').text('Mappings saved!');
 			makeHltvTable();
@@ -401,14 +404,16 @@ function addSettings() {
 	var dmgError = $('<span style="padding-top: 8px; color: red"></span>');
 	
 	function addDmgMapping(a, b) {
-		if(a.trim().length == 0 || b.trim().length == 0) {
+		a = a.trim().toLowerCase();
+		b = b.trim().toLowerCase();
+		if(a.length == 0 || b.length == 0) {
 			dmgError.css('color', 'red').text('Please fill in both textfields');
 		}
-		else if(hltvMapping[a.trim()]) {
+		else if(hltvMapping[a]) {
 			dmgError.css('color', 'red').text('A mapping for \'' + a + '\' already exists');
 		}
 		else {
-			dmgMapping[a] = b.trim();
+			dmgMapping[a] = b;
 			GM_setValue('dmg_mapping', JSON.stringify(hltvMapping));
 			dmgError.css('color', 'white').text('Mappings saved!');
 			makeDmgTable();
