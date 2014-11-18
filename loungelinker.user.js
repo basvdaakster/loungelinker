@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.54
+// @version      0.54
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -17,7 +17,32 @@
 // @updateURL    https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // ==/UserScript==
-var version = GM_info && GM_info["script"] && GM_info["script"]["version"] ? parseFloat(GM_info["script"]["version"]) : 0;
+var version = GM_info && GM_info['script'] && GM_info['script']['version'] ? parseFloat(GM_info['script']['version']) : 0;
+
+var lastUpdateCheck = GM_getValue('cache_lastupdate');
+if(!lastUpdateCheck || Date.now() - lastUpdateCheck > 1000 * 60 * 60 * 24) {
+	GM_xmlhttpRequest({ method: 'GET', url: 'https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js?'+Math.random(), onload: function(response) {
+		var versionMatch = /@version\s+(\d+(?:\.\d+))/.exec(response.responseText);console.log(response);
+		if(versionMatch && versionMatch.length == 2) {
+			if(parseFloat(versionMatch[1]) > version) {
+				var notification = $('<div>');
+				notification.css({
+					position: 'absolute',
+					left: '0px',
+					top: '0px',
+					padding: '5px',
+					fontWeight: 'bold',
+					background: 'rgba(0, 0, 0, 0.5)',
+					color: '#ffffff'
+				});
+				notification.text('A new version of LoungeLinker is available, please update via the Tamper/Greasemonkey menu');
+				$('body').append(notification);
+				notification.fadeOut(5000);
+			}
+		}
+		GM_setValue('cache_lastupdate', Date.now());
+	} });
+}
 
 function cacheValue(key, value) {
 	GM_setValue('cache_' + key, value);
@@ -30,6 +55,9 @@ function getCachedValue(key, defaultValue) {
 function clearStorage() {
 	var keys = GM_listValues();
 	for(var i in keys) {
+		if(key == 'hltv_mapping' || key == 'dmg_mapping') {
+			continue;
+		}
 		var key = keys[i];
 		GM_deleteValue(key);
 		console.log('Deleting \'' + key + '\'');
@@ -97,6 +125,16 @@ var dmgMapping = {
 	'ams': 'animosity',
 	'gb': 'gbots'
 };
+
+var hltvMappingRaw = GM_getValue('hltv_mapping');
+if(hltvMappingRaw) {
+	hltvMapping = JSON.parse(hltvMappingRaw);
+}
+
+var dmgMappingRaw = GM_getValue('dmg_mapping');
+if(dmgMappingRaw) {
+	dmgMapping = JSON.parse(dmgMappingRaw);
+}
 
 /* Used for scraping */
 var redditRegex = new RegExp('<a class="title may-blank.*?" href="/r/csgobetting/comments/(.*?)" tabindex="1" >(.*?)</a>', 'g');
@@ -259,16 +297,11 @@ function addLinks() {
 
 function addSettings() {
 	var settings = $('<div>');
+	settings.append($('<h1>LoungeLinker v' + version + '</h1>'));
 	
-	var keys = GM_listValues();
-	for(var i in keys) {
-		var key = keys[i];
-		if(key.indexOf('settings_') == 0) {
-			console.log(key, GM_getValue(key));
-		}
-	}
-	
-	var saveIndicator = $('<h4 style="padding-top: 8px">Settings saved!</h4>');
+	/* General settings */
+	settings.append($('<h2 style="font-weight: bold">General settings</h2>'));
+	var saveIndicator = $('<span style="padding-top: 8px">Settings saved!</span>');
 	saveIndicator.hide();
 	
 	var redditCheckbox = $('<input type="checkbox" id="ll_reddit">');
@@ -297,14 +330,137 @@ function addSettings() {
 	
 	var compatText = 'When disabled LoungeAssistant might pick up LoungeLinker\'s links as match links causing it to fail displaying the best-of type of the match.';
 	
-	settings.append($('<h1>LoungeLinker v' + version + '</h1>'))
-			.append($('<div>').append(redditCheckbox).append('<label for="ll_reddit">Show reddit links</label>'))
+	settings.append($('<div>').append(redditCheckbox).append('<label for="ll_reddit">Show reddit links</label>'))
 			.append($('<div>').append(hltvCheckbox).append('<label for="ll_hltv">Show hltv links</label>'))
 			.append($('<div>').append(dmgCheckbox).append('<label for="ll_99dmg">Show 99damage links</label>'))
 			.append($('<div>').append(compatCheckbox).append('<label for="ll_compat" title="' + compatText + '">Enable compatibility mode</label>'))
 			.append($('<div style="overflow: hidden">').append(saveButton).append(saveIndicator));
 	
-	settings.append($('<br>')).append($('<a class="button">Clear cache</a>').click(function() {
+	/* HLTV Mappings */
+	settings.append('<br>').append('<br>');
+	settings.append($('<div>').append($('<h2 style="font-weight: bold">HLTV Mappings</h2>')));
+	
+	var hltvTable = $('<table style="width: 100%"></table>');
+	hltvTable.append($('<thead><tr style="font-weight: bold"><td>CSGO Lounge</td><td>HLTV</td><td>&nbsp;</td></tr></thead>'));
+	var hltvTableBody = $('<tbody>');
+	var hltvCsgoInput = $('<input style="width: 90%" type="text">');
+	var hltvHltvInput = $('<input style="width: 90%" type="text">');
+	var hltvAddButton = $('<button>Add</button>');
+	var hltvError = $('<span style="padding-top: 8px; color: red"></span>');
+	
+	function addHltvMapping(a, b) {
+		if(a.trim().length == 0 || b.trim().length == 0) {
+			hltvError.css('color', 'red').text('Please fill in both textfields');
+		}
+		else if(hltvMapping[a.trim()]) {
+			hltvError.css('color', 'red').text('A mapping for \'' + a + '\' already exists');
+		}
+		else {
+			hltvMapping[a] = b.trim();
+			GM_setValue('hltv_mapping', JSON.stringify(hltvMapping));
+			hltvError.css('color', 'white').text('Mappings saved!');
+			makeHltvTable();
+		}
+	}
+	
+	function makeHltvTable() {
+		hltvTableBody.empty();
+		for(var key in hltvMapping) {
+			hltvTableBody.append($('<tr>')
+				.append($('<td>' + key + '</td>'))
+				.append($('<td>' + hltvMapping[key] + '</td>'))
+				.append($('<td><a href="#">Delete</a></td>').click(function() {
+					delete hltvMapping[key];
+					GM_setValue('hltv_mapping', JSON.stringify(hltvMapping));
+					makeHltvTable();
+				})));
+		}
+		hltvTableBody.append($('<tr>')
+			.append($('<td>').append(hltvCsgoInput))
+			.append($('<td>').append(hltvHltvInput))
+			.append($('<td>').append(hltvAddButton)));
+		hltvAddButton.click(function() {
+			addHltvMapping(hltvCsgoInput.val(), hltvHltvInput.val());
+		});
+	}
+	makeHltvTable();
+			
+	settings.append(hltvTable.append(hltvTableBody));
+	settings.append(hltvError);
+	
+	/* Dmg Mappings */
+	settings.append('<br>').append('<br>');
+	settings.append($('<div>').append($('<h2 style="font-weight: bold">99Damage Mappings</h2>')));
+	
+	var dmgTable = $('<table style="width: 100%"></table>');
+	dmgTable.append($('<thead><tr style="font-weight: bold"><td>CSGO Lounge</td><td>99Damage</td><td>&nbsp;</td></tr></thead>'));
+	var dmgTableBody = $('<tbody>');
+	var dmgCsgoInput = $('<input style="width: 90%" type="text">');
+	var dmgDmgInput = $('<input style="width: 90%" type="text">');
+	var dmgAddButton = $('<button>Add</button>');
+	var dmgError = $('<span style="padding-top: 8px; color: red"></span>');
+	
+	function addDmgMapping(a, b) {
+		if(a.trim().length == 0 || b.trim().length == 0) {
+			dmgError.css('color', 'red').text('Please fill in both textfields');
+		}
+		else if(hltvMapping[a.trim()]) {
+			dmgError.css('color', 'red').text('A mapping for \'' + a + '\' already exists');
+		}
+		else {
+			dmgMapping[a] = b.trim();
+			GM_setValue('dmg_mapping', JSON.stringify(hltvMapping));
+			dmgError.css('color', 'white').text('Mappings saved!');
+			makeDmgTable();
+		}
+	}
+	
+	function makeDmgTable() {
+		dmgTableBody.empty();
+		for(var key in dmgMapping) {
+			dmgTableBody.append($('<tr>')
+				.append($('<td>' + key + '</td>'))
+				.append($('<td>' + dmgMapping[key] + '</td>'))
+				.append($('<td><a href="#">Delete</a></td>').click(function() {
+					delete dmgMapping[key];
+					GM_setValue('dmg_mapping', JSON.stringify(dmgMapping));
+					makeDmgTable();
+				})));
+		}
+		dmgTableBody.append($('<tr>')
+			.append($('<td>').append(dmgCsgoInput))
+			.append($('<td>').append(dmgDmgInput))
+			.append($('<td>').append(dmgAddButton)));
+		dmgAddButton.click(function() {
+			addDmgMapping(dmgCsgoInput.val(), dmgDmgInput.val());
+		});
+	}
+	makeDmgTable();
+	
+	dmgAddButton.click(function() {
+		if(dmgMapping[dmgCsgoInput.val().trim()]) {
+			dmgError.css('color', 'red').text('A mapping for \'' + dmgCsgoInput.text() + '\' already exists').show().fadeOut();
+		}
+		else if(dmgCsgoInput.val().trim().length == 0 || dmgDmgInput.val().trim().length == 0) {
+			dmgError.css('color', 'red').text('Please fill in both textfields').show().fadeOut();
+		}
+		else {
+			dmgMapping[dmgCsgoInput.val().trim()] = dmgDmgInput.val().trim();
+			GM_setValue('dmg_mapping', JSON.stringify(dmgMapping));
+			dmgError.css('color', 'white').text('Mappings saved!').show().fadeOut();
+			makeDmgTable();
+		}
+	});
+			
+	settings.append(dmgTable.append(dmgTableBody));
+	settings.append(dmgError);
+	
+	
+	/* Tools */
+	settings.append('<br>').append('<br>');
+	settings.append($('<div>').append('<br>').append($('<h2 style="font-weight: bold">Tools</h2>')));
+	
+	settings.append('<br>').append($('<div>').append($('<a class="button">Clear cache</a>').click(function() {
 		clearCache();
 	})).append($('<a class="button">Clear cache & settings</a>').click(function() {
 		clearStorage();
@@ -313,7 +469,7 @@ function addSettings() {
 		hltvCheckbox.prop('checked', GM_getValue('settings_hltv', true));
 		dmgCheckbox.prop('checked', GM_getValue('settings_99dmg', true));
 		compatCheckbox.prop('checked', GM_getValue('settings_compatibility', false));
-	}));
+	})));
 
 	var tabButton = $('<a class="button">LoungeLinker</a>');
 	tabButton.click(function() {
