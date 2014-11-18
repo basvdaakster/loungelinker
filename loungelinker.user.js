@@ -108,7 +108,7 @@ function getRedditLinks(matchUrl, callback) {
         return callback(JSON.parse(cache[0]));
     }
 
-    var url = 'http://www.reddit.com/r/csgobetting/search?q=selftext:' + encodeURIComponent(matchUrl) + '&sort=top&restrict_sr=on&t=all';
+    var url = 'http://www.reddit.com/r/csgobetting/search?q=selftext:' + encodeURIComponent(matchUrl) + '&sort=top&restrict_sr=on&t=week';
     GM_xmlhttpRequest ({ method: 'GET', url: url, onload: function (response) {
         var matches;
         var links = [];
