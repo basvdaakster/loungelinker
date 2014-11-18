@@ -94,7 +94,8 @@ var dmgMapping = {
 	'cph.w': 'cph',
 	'vp': 'virtus',
 	'lc': 'london conspiracy',
-	'ams': 'animosity'
+	'ams': 'animosity',
+	'gb': 'gbots'
 };
 
 /* Used for scraping */
