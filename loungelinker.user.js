@@ -268,42 +268,41 @@ function addSettings() {
 		}
 	}
 	
+	var saveIndicator = $('<h4 style="padding-top: 8px">Settings saved!</h4>');
+	saveIndicator.hide();
+	
 	var redditCheckbox = $('<input type="checkbox" id="ll_reddit">');
-	redditCheckbox.change(function() {
-		GM_setValue('settings_reddit', redditCheckbox.prop('checked'));
-		console.log('\'settings_reddit\' set to \'' + redditCheckbox.prop('checked') + '\'');
-	});
-	
 	var hltvCheckbox = $('<input type="checkbox" id="ll_hltv">');
-	hltvCheckbox.change(function() {
-		GM_setValue('settings_hltv', hltvCheckbox.prop('checked'));
-		console.log('\'settings_hltv\' set to \'' + hltvCheckbox.prop('checked') + '\'');
-	});
-	
 	var dmgCheckbox = $('<input type="checkbox" id="ll_99dmg">');
-	dmgCheckbox.change(function() {
-		GM_setValue('settings_99dmg', dmgCheckbox.prop('checked'));
-		console.log('\'settings_99dmg\' set to \'' + dmgCheckbox.prop('checked') + '\'');
-	});
-	
 	var compatCheckbox = $('<input type="checkbox" id="ll_compat">');
-	compatCheckbox.change(function() {
-		GM_setValue('settings_compatibility', compatCheckbox.prop('checked'));
-		console.log('\'settings_compatibility\' set to \'' + compatCheckbox.prop('checked') + '\'');
-	});
 	
 	redditCheckbox.prop('checked', GM_getValue('settings_reddit', true));
 	hltvCheckbox.prop('checked', GM_getValue('settings_hltv', true));
 	dmgCheckbox.prop('checked', GM_getValue('settings_99dmg', true));
 	compatCheckbox.prop('checked', GM_getValue('settings_compatibility', false));
 	
+	var saveButton = $('<a href="#" class="button">Save</a>');
+	saveButton.click(function() {
+		GM_setValue('settings_reddit', redditCheckbox.prop('checked'));
+		console.log('\'settings_reddit\' set to \'' + redditCheckbox.prop('checked') + '\'');
+		GM_setValue('settings_hltv', hltvCheckbox.prop('checked'));
+		console.log('\'settings_hltv\' set to \'' + hltvCheckbox.prop('checked') + '\'');
+		GM_setValue('settings_99dmg', dmgCheckbox.prop('checked'));
+		console.log('\'settings_99dmg\' set to \'' + dmgCheckbox.prop('checked') + '\'');
+		GM_setValue('settings_compatibility', compatCheckbox.prop('checked'));
+		console.log('\'settings_compatibility\' set to \'' + compatCheckbox.prop('checked') + '\'');
+			
+		saveIndicator.show().fadeOut();
+	});
+	
 	var compatText = 'When disabled LoungeAssistant might pick up LoungeLinker\'s links as match links causing it to fail displaying the best-of type of the match.';
 	
-	settings.append($('<div style="width: 100%; float: left; font-weight: bold">LoungeLinker v' + version + '</div><br>'))
-			.append($('<div style="width: 100%; float: left">').append(redditCheckbox).append('<label for="ll_reddit">Show reddit links</label>'))
-			.append($('<div style="width: 100%; float: left">').append(hltvCheckbox).append('<label for="ll_hltv">Show hltv links</label>'))
-			.append($('<div style="width: 100%; float: left">').append(dmgCheckbox).append('<label for="ll_99dmg">Show 99damage links</label>'))
-			.append($('<div style="width: 100%; float: left">').append(compatCheckbox).append('<label for="ll_compat" title="' + compatText + '">Enable compatibility mode</label>'));
+	settings.append($('<h1>LoungeLinker v' + version + '</h1>'))
+			.append($('<div>').append(redditCheckbox).append('<label for="ll_reddit">Show reddit links</label>'))
+			.append($('<div>').append(hltvCheckbox).append('<label for="ll_hltv">Show hltv links</label>'))
+			.append($('<div>').append(dmgCheckbox).append('<label for="ll_99dmg">Show 99damage links</label>'))
+			.append($('<div>').append(compatCheckbox).append('<label for="ll_compat" title="' + compatText + '">Enable compatibility mode</label>'))
+			.append($('<div style="overflow: hidden">').append(saveButton).append(saveIndicator));
 	
 	settings.append($('<br>')).append($('<a class="button">Clear cache</a>').click(function() {
 		clearCache();
