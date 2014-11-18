@@ -67,7 +67,8 @@ for(var i in keys) {
 			console.log('Deleting cache from old version for \'' + key + '\'');
 			GM_deleteValue(key);
 		}
-		else if(Date.now() - value[1] > 1000 * 60 * 60 * 24) {
+		else if(Date.now() - value[1] > 1000 * 60 * 60 * 48) {
+			// Delete cache older than 2 days
 			console.log('Deleting cache for \'' + key + '\'');
 			GM_deleteValue(key);
 		}
