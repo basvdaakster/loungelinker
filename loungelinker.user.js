@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.61
+// @version      1.65
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -124,7 +124,8 @@ var dmgMapping = {
 	'vp': 'virtus',
 	'lc': 'london conspiracy',
 	'ams': 'animosity',
-	'gb': 'gbots'
+	'gb': 'gbots',
+	'ibp': 'ibuypower'
 };
 
 var hltvMappingRaw = GM_getValue('hltv_mapping');
@@ -209,7 +210,7 @@ function get99DmgTeamLink(team, callback) {
 			onload: function(response) {
 				var json = JSON.parse(response.responseText);
 				if(json.join && json.length > 0) {
-					var link = 'http://csgo.99damage.de/de/edb/team/' + json[0][0];
+					var link = ['http://csgo.99damage.de/de/edb/team/' + json[0][0], json[0][1]];
 					cacheValue(team + '_99dmg', [ link, Date.now() ]);
 					callback(link);
 				}
@@ -280,7 +281,7 @@ function addLinks() {
 			get99DmgTeamLink(teams[0], function(link) {
 				if(link) {
 					dmgContainer.show();
-					var a = createLink(link, teams[0]).css({ 'marginRight': '4px', 'float': 'none' });
+					var a = createLink(link[0], link[1]).css({ 'marginRight': '4px', 'float': 'none' });
 					dmgContainer.append(a);
 				}
 			});
@@ -288,7 +289,7 @@ function addLinks() {
 			get99DmgTeamLink(teams[1], function(link) {
 				if(link) {
 					dmgContainer.show();
-					var a = createLink(link, teams[1]).css({ 'marginRight': '4px', 'float': 'none' });
+					var a = createLink(link[0], link[1]).css({ 'marginRight': '4px', 'float': 'none' });
 					dmgContainer.append(a);
 				}
 			});
