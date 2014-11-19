@@ -35,7 +35,7 @@ if(!lastUpdateCheck || Date.now() - lastUpdateCheck > 1000 * 60 * 60 * 24) {
 					background: 'rgba(0, 0, 0, 0.5)',
 					color: '#ffffff'
 				});
-				notification.text('A new version of LoungeLinker is available, please update via the Tampermenu or <a href="https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js">reinstall</a> the script on Greasemonkey');
+				notification.html('A new version of LoungeLinker is available, please update via the Tampermenu or <a href="https://raw.githubusercontent.com/basvdaakster/loungelinker/master/loungelinker.user.js">reinstall</a> the script on Greasemonkey');
 				$('body').append(notification);
 				notification.fadeOut(5000);
 			}
