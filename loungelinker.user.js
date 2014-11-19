@@ -195,7 +195,7 @@ function get99DmgTeamLink(team, callback) {
 	team = dmgMapping[team] || team;
 	var cache = getCachedValue(team + '_99dmg');
 	if(cache) {
-		callback(cache);
+		callback(cache[0]);
 	}
 	else {
 		GM_xmlhttpRequest({ 
