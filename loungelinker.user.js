@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LoungeLinker
 // @namespace    https://github.com/basvdaakster/
-// @version      1.66
+// @version      1.7
 // @description  Adds useful links to csgolounge matches
 // @author       Basti
 // @match        http://csgolounge.com/
@@ -234,7 +234,11 @@ function addLinks() {
         matchLeft.find('a').append(container);
         
         var matchUrl = 'http://csgolounge.com/' + me.find('.matchleft a').attr('href');
-        var teams = [ matchLeft.find('.teamtext b')[0].innerHTML.trim(), matchLeft.find('.teamtext b')[1].innerHTML.trim() ];
+        var bs = matchLeft.find('.teamtext b');
+        if(bs.length < 2) {
+        	return;
+        }
+        var teams = [ bs[0].innerHTML.trim(), bs[1].innerHTML.trim() ];
         
         var redditContainer = $('<div>');
         var hltvContainer = $('<div>');
